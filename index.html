@@ -1,0 +1,361 @@
+<title>Bin ich vom BFSG betroffen?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+  /* Layout: schmale Lesespalte, dunkler Hero, der Entscheidungsbaum als eigene Karte in der Mitte, Belege unten. */
+  :root{
+    --ink:#15202b;
+    --paper:#fbfaf8;
+    --panel:#ffffff;
+    --muted:#55636f;
+    --rule:#dfe4e9;
+    --accent:#b4531b;
+    --accent-soft:#fdf2e9;
+    --ok:#2b5d35;
+    --ok-soft:#eef4ee;
+    --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+    --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#e9eef3;
+      --paper:#101820;
+      --panel:#17212b;
+      --muted:#9aaab8;
+      --rule:#27333f;
+      --accent:#e08a4d;
+      --accent-soft:#2a1d13;
+      --ok:#8fcb9b;
+      --ok-soft:#16241a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#e9eef3;
+    --paper:#101820;
+    --panel:#17212b;
+    --muted:#9aaab8;
+    --rule:#27333f;
+    --accent:#e08a4d;
+    --accent-soft:#2a1d13;
+    --ok:#8fcb9b;
+    --ok-soft:#16241a;
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:var(--body); font-size:17px; line-height:1.62;
+    margin:0;
+  }
+  .wrap{
+    max-width:720px; margin:0 auto;
+    padding-left:max(16px, env(safe-area-inset-left, 0px));
+    padding-right:max(16px, env(safe-area-inset-right, 0px));
+  }
+  h1,h2,h3,.ui{font-family:var(--display)}
+  a{color:var(--accent)}
+
+  /* Hero */
+  .hero{background:#15202b; color:#eef2f6}
+  .hero .wrap{padding-block:64px 56px}
+  .eyebrow{
+    font-family:var(--display); font-size:12px; font-weight:700;
+    letter-spacing:.2em; text-transform:uppercase; color:#e9a877; margin:0 0 18px;
+  }
+  h1{
+    font-size:clamp(34px,7vw,54px); line-height:1.04; font-weight:800;
+    letter-spacing:-0.03em; margin:0; text-wrap:balance;
+  }
+  .hero .lead{
+    font-size:19px; color:#c3cfd9; margin:22px 0 0; max-width:34em;
+  }
+  .hero .rule{height:4px;width:88px;background:var(--accent);margin:28px 0 0}
+
+  /* Entscheidungsbaum */
+  .tree{margin-top:-34px}
+  .card{
+    background:var(--panel); border:1px solid var(--rule); border-radius:4px;
+    padding:28px 26px; box-shadow:0 18px 40px rgba(21,32,43,.09);
+  }
+  .step{
+    font-family:var(--display); font-size:12px; font-weight:700;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--accent);
+    display:flex; justify-content:space-between; gap:12px; margin-bottom:14px;
+  }
+  .q{font-family:var(--display); font-size:clamp(21px,4vw,27px); line-height:1.25; font-weight:700; margin:0; text-wrap:balance}
+  .hint{color:var(--muted); font-size:16px; margin:12px 0 0}
+  .answers{display:flex; gap:12px; margin-top:22px; flex-wrap:wrap}
+  button.ans{
+    font-family:var(--display); font-size:16px; font-weight:600;
+    padding:12px 26px; border-radius:3px; cursor:pointer;
+    border:1.5px solid var(--ink); background:transparent; color:var(--ink);
+    min-width:120px;
+  }
+  button.ans:hover{background:var(--ink); color:var(--paper)}
+  button.ans:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+  .back{
+    background:none;border:none;padding:0;margin-top:18px;cursor:pointer;
+    font-family:var(--display);font-size:14px;color:var(--muted);text-decoration:underline;
+  }
+  .progress{display:flex;gap:5px;margin-top:22px}
+  .progress i{height:3px;flex:1;background:var(--rule);border-radius:2px}
+  .progress i.on{background:var(--accent)}
+
+  /* Ergebnis */
+  .verdict{font-family:var(--display);font-size:clamp(22px,4.4vw,30px);line-height:1.2;font-weight:800;margin:0 0 14px;text-wrap:balance}
+  .verdict.ok{color:var(--ok)}
+  .note{
+    background:var(--accent-soft); border-left:3px solid var(--accent);
+    padding:16px 18px; margin:20px 0 0; font-size:16px;
+  }
+  .note.green{background:var(--ok-soft); border-left-color:var(--ok)}
+  .note b{font-family:var(--display)}
+  .para{font-family:var(--display);font-size:13px;color:var(--muted);margin-top:16px}
+
+  .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+  .btn{
+    font-family:var(--display);font-weight:700;font-size:16px;text-decoration:none;
+    padding:14px 24px;border-radius:3px;display:inline-block;
+  }
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.ghost{border:1.5px solid var(--rule);color:var(--ink)}
+
+  /* Fließtext-Abschnitte */
+  section.band{padding-block:56px}
+  h2{font-size:clamp(24px,4.6vw,32px);line-height:1.15;font-weight:700;letter-spacing:-0.02em;margin:0 0 8px;text-wrap:balance}
+  .sub{color:var(--muted);margin:0 0 26px;font-size:17px}
+  .facts{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .fact{border-top:2px solid var(--ink);padding-top:14px;min-width:0}
+  .fact h3{font-size:17px;font-weight:700;margin:0 0 6px}
+  .fact p{margin:0;font-size:16px;color:var(--muted)}
+  .steps{border-top:1px solid var(--rule);margin-top:8px}
+  .steps div{border-bottom:1px solid var(--rule);padding:13px 0;display:flex;gap:16px;align-items:baseline}
+  .steps span{font-family:var(--display);font-size:13px;font-weight:700;color:var(--accent);width:62px;flex:none}
+  .steps p{margin:0;font-size:16px;min-width:0}
+
+  footer{border-top:1px solid var(--rule);margin-top:20px}
+  footer .wrap{padding-block:34px 48px}
+  footer p{font-size:14px;color:var(--muted);margin:0 0 10px}
+  footer a{color:var(--muted)}
+
+  @media (prefers-reduced-motion: no-preference){
+    .fade{animation:f .25s ease-out}
+    @keyframes f{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  }
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Barrierefreiheitsstärkungsgesetz · Stand November 2026</p>
+    <h1>Bin ich vom BFSG betroffen?</h1>
+    <div class="rule"></div>
+    <p class="lead">
+      Seit dem 28. Juni 2025 müssen viele Onlineshops in Deutschland barrierefrei sein.
+      Ein erheblicher Teil der kleinen Shops ist ausgenommen — und zahlt trotzdem für Beratung.
+      Fünf Fragen, zehn Minuten, dann wissen Sie es.
+    </p>
+  </div>
+</header>
+
+<div class="wrap tree">
+  <div class="card" id="card">
+    <div class="step"><span id="stepno">Frage 1 von 5</span><span id="steptag">Anwendungsbereich</span></div>
+    <h2 class="q" id="qtext">Können Kundinnen und Kunden über Ihre Website etwas kaufen oder buchen?</h2>
+    <p class="hint" id="qhint">Shop, Buchungsformular, kostenpflichtiges Abo: ja. Eine reine Informationsseite mit Telefonnummer und Kontaktformular: nein.</p>
+    <div class="answers" id="answers">
+      <button class="ans" type="button" data-a="ja">Ja</button>
+      <button class="ans" type="button" data-a="nein">Nein</button>
+    </div>
+    <div class="progress" id="progress"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+    <button class="back" id="back" type="button" hidden>Eine Frage zurück</button>
+  </div>
+</div>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Was wirklich droht</h2>
+    <p class="sub">Die Zahl „100.000 Euro“ steht in fast jedem Werbetext. Hier steht, wo sie herkommt.</p>
+    <div class="facts">
+      <div class="fact">
+        <h3>Zwei Bußgeldstufen</h3>
+        <p>Bis zu 100.000 Euro gelten nur für fünf bestimmte Verstöße nach § 37 Abs. 1 BFSG. Für alle übrigen liegt der Rahmen bei bis zu 10.000 Euro.</p>
+      </div>
+      <div class="fact">
+        <h3>Erst die Frist, dann das Geld</h3>
+        <p>Die §§ 29 und 30 BFSG schreiben ein Stufenverfahren vor: Aufforderung mit Frist, zweite Aufforderung mit Androhung, erst danach wird es ernst.</p>
+      </div>
+      <div class="fact">
+        <h3>Kein Klagerecht einzelner Nutzer</h3>
+        <p>Das BFSG gewährt dem einzelnen Kunden weder einen Anspruch auf Barrierefreiheit noch Schadensersatz. Durchgesetzt wird über die Marktüberwachung.</p>
+      </div>
+      <div class="fact">
+        <h3>Ungeklärt: Abmahnungen</h3>
+        <p>Ob ein BFSG-Verstoß von Mitbewerbern abgemahnt werden kann, ist in der Fachliteratur umstritten. Eine klärende Gerichtsentscheidung ist nicht bekannt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" style="border-top:1px solid var(--rule)">
+  <div class="wrap">
+    <h2>Und wenn Sie betroffen sind?</h2>
+    <p class="sub">Agenturen verkaufen dafür Audits im vierstelligen Bereich. Das meiste davon lässt sich mit kostenlosen Werkzeugen selbst prüfen — in etwa zwei Nachmittagen.</p>
+    <div class="steps">
+      <div><span>Kap. 3</span><p>Vier kostenlose Werkzeuge, und welche fünf Seiten Ihres Shops überhaupt geprüft werden müssen</p></div>
+      <div><span>Kap. 4</span><p>Die sechs Fehlerarten, die laut WebAIM-Million-Bericht 2026 für 96 Prozent aller erkannten Probleme stehen</p></div>
+      <div><span>Kap. 5</span><p>Was kein Programm findet: Tastaturrunde, Fokus, Zoom, Fehlermeldungen — Schritt 7 bis 20</p></div>
+      <div><span>Kap. 6</span><p>Der Pflichttext nach Anlage 3 BFSG, als Vorlage zum Ausfüllen. Daran setzt eine behördliche Prüfung zuerst an</p></div>
+      <div><span>Kap. 8</span><p>Ihr Plan, falls Post von der Marktüberwachungsstelle kommt</p></div>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="https://frolovian7.gumroad.com/l/bfsg-check-leseprobe">Kapitel 1 und 2 kostenlos lesen</a>
+      <a class="btn ghost" href="https://frolovian7.gumroad.com/l/bfsg-selbstaudit">Das vollständige Selbstaudit, 39 €</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Quellen: BFSG und BFSGV im amtlichen Wortlaut (gesetze-im-internet.de) · Marktüberwachungsstelle der Länder
+      für die Barrierefreiheit von Produkten und Dienstleistungen, Magdeburg · WCAG 2.1 · WebAIM Million 2026.
+      Alle Angaben geprüft am 9. November 2026.
+    </p>
+    <p>
+      Allgemeine Information zur Rechtslage, keine Rechtsberatung und keine Beratung im Einzelfall.
+      Wer eine Abmahnung oder eine Androhung der Behörde erhalten hat, gehört zu einem Anwalt.
+    </p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var QUESTIONS = [
+    {
+      tag: "Anwendungsbereich",
+      q: "Können Kundinnen und Kunden über Ihre Website etwas kaufen oder buchen?",
+      hint: "Shop, Buchungsformular, kostenpflichtiges Abo: ja. Eine reine Informationsseite mit Telefonnummer und Kontaktformular: nein.",
+      nein: "raus_dienstleistung"
+    },
+    {
+      tag: "Zielgruppe",
+      q: "Richtet sich Ihr Angebot auch an Privatkunden?",
+      hint: "Das BFSG schützt Verbraucher. Ein reiner B2B-Shop mit echter Zugangsbeschränkung fällt nach verbreiteter Auffassung heraus.",
+      nein: "raus_b2b"
+    },
+    {
+      tag: "Betriebsgröße",
+      q: "Hat Ihr Unternehmen weniger als zehn Beschäftigte?",
+      hint: "Teilzeit wird anteilig gerechnet. Bei zehn oder mehr Personen greift die Kleinstunternehmer-Ausnahme nicht.",
+      nein: "betroffen"
+    },
+    {
+      tag: "Betriebsgröße",
+      q: "Liegt Ihr Jahresumsatz oder Ihre Bilanzsumme bei höchstens zwei Millionen Euro?",
+      hint: "§ 2 Nr. 17 BFSG verlangt beides zusammen: unter zehn Beschäftigte und eine der beiden Zwei-Millionen-Grenzen.",
+      nein: "betroffen"
+    },
+    {
+      tag: "Produkte",
+      q: "Verkaufen Sie Smartphones, Tablets, Notebooks, E-Book-Lesegeräte oder Fernseher mit Internetzugang?",
+      hint: "Die Ausnahme in § 3 Abs. 3 BFSG gilt nur für Dienstleistungen, nicht für Produkte im Anwendungsbereich des § 1 Abs. 2 BFSG.",
+      ja: "produkte",
+      nein: "ausgenommen"
+    }
+  ];
+
+  var RESULTS = {
+    raus_dienstleistung: {
+      ok: true,
+      title: "Ihre Website ist wahrscheinlich nicht erfasst.",
+      body: "Das BFSG gilt für Dienstleistungen im elektronischen Geschäftsverkehr — also für Websites, über die Verbraucher Verträge abschließen. Eine reine Informationsseite fällt nach dem Wortlaut des § 2 Nr. 26 BFSG nicht darunter.",
+      note: "Halten Sie das Ergebnis mit Datum schriftlich fest. Wenn Sie später gefragt werden, warum Sie nichts unternommen haben, haben Sie damit eine Antwort statt einer Erinnerung.",
+      green: true,
+      para: "§ 1 Abs. 3, § 2 Nr. 26 BFSG"
+    },
+    raus_b2b: {
+      ok: true,
+      title: "Ein reiner B2B-Shop ist nach verbreiteter Auffassung nicht erfasst.",
+      body: "Das BFSG schützt Verbraucher. Entscheidend ist, ob die Zugangsbeschränkung echt ist — ein Shop, bei dem „auch“ Privatleute bestellen können, ist erfasst.",
+      note: "Prüfen Sie, ob Ihre Beschränkung wirklich greift: Gewerbenachweis bei der Registrierung ja, ein Häkchen „Ich bin Gewerbetreibender“ eher nicht.",
+      para: "§ 1 BFSG"
+    },
+    betroffen: {
+      title: "Ihr Shop fällt unter das BFSG.",
+      body: "Damit gelten zwei Pflichten: Der Shop muss bedienbar sein — mit Tastatur, Vorleseprogramm und vergrößerter Schrift — und Sie müssen öffentlich darlegen, wie er die Anforderungen erfüllt.",
+      note: "Die zweite Pflicht wird regelmäßig übersehen, ist ohne Entwickler erfüllbar und kostet etwa eine Stunde. Genau daran setzt eine behördliche Prüfung zuerst an.",
+      para: "§ 3 Abs. 1, § 14 und Anlage 3 BFSG, § 12 BFSGV"
+    },
+    ausgenommen: {
+      ok: true,
+      title: "Ihr Shop ist voraussichtlich als Kleinstunternehmen ausgenommen.",
+      body: "§ 3 Abs. 3 Satz 1 BFSG nimmt Kleinstunternehmen, die Dienstleistungen anbieten, von der Pflicht aus. Der Betrieb eines Onlineshops ist eine solche Dienstleistung.",
+      note: "<b>Hier ist die Rechtslage unklar.</b> Manche argumentieren, ein Shop verkaufe Produkte und keine Dienstleistung, die Ausnahme greife deshalb nie. Fachkanzleien halten dagegen. Ein Urteil dazu gibt es nicht. Wer knapp unter den Grenzen liegt, veröffentlicht den Pflichttext freiwillig — das kostet eine Stunde und nimmt der Frage die Spitze.",
+      para: "§ 2 Nr. 17, § 3 Abs. 3 BFSG"
+    },
+    produkte: {
+      title: "Für den Shop ausgenommen — für Ihre Produkte nicht.",
+      body: "Die Kleinstunternehmer-Ausnahme gilt ausdrücklich nur für Dienstleistungen. Wer Produkte im Anwendungsbereich des § 1 Abs. 2 BFSG vertreibt, bleibt insoweit verpflichtet, auch als Kleinstunternehmen.",
+      note: "Als Händler reichen Sie die Barrierefreiheits-Informationen des Herstellers durch, soweit er sie Ihnen zur Verfügung stellt. Sie müssen nichts selbst erfinden.",
+      para: "§ 1 Abs. 2, § 3 Abs. 3 BFSG, § 19 BFSGV"
+    }
+  };
+
+  var card = document.getElementById("card");
+  var path = [];
+  var i = 0;
+
+  function esc(s){ return s; }
+
+  function renderQuestion(){
+    var q = QUESTIONS[i];
+    var bars = QUESTIONS.map(function(_, n){ return '<i class="' + (n <= i ? "on" : "") + '"></i>'; }).join("");
+    card.className = "card fade";
+    card.innerHTML =
+      '<div class="step"><span>Frage ' + (i + 1) + ' von 5</span><span>' + q.tag + '</span></div>' +
+      '<h2 class="q">' + q.q + '</h2>' +
+      '<p class="hint">' + q.hint + '</p>' +
+      '<div class="answers">' +
+        '<button class="ans" type="button" data-a="ja">Ja</button>' +
+        '<button class="ans" type="button" data-a="nein">Nein</button>' +
+      '</div>' +
+      '<div class="progress">' + bars + '</div>' +
+      (i > 0 ? '<button class="back" type="button">Eine Frage zurück</button>' : '');
+  }
+
+  function renderResult(key){
+    var r = RESULTS[key];
+    card.className = "card fade";
+    card.innerHTML =
+      '<div class="step"><span>Ergebnis</span><span>' + r.para + '</span></div>' +
+      '<h2 class="verdict' + (r.ok ? " ok" : "") + '">' + r.title + '</h2>' +
+      '<p>' + r.body + '</p>' +
+      '<div class="note' + (r.green ? " green" : "") + '">' + r.note + '</div>' +
+      '<div class="cta">' +
+        '<a class="btn primary" href="https://frolovian7.gumroad.com/l/bfsg-check-leseprobe">Kapitel 1 und 2 kostenlos lesen</a>' +
+        '<a class="btn ghost" href="https://frolovian7.gumroad.com/l/bfsg-selbstaudit">Vollständiges Selbstaudit, 39 €</a>' +
+      '</div>' +
+      '<button class="back" type="button">Noch einmal von vorn</button>';
+  }
+
+  card.addEventListener("click", function(e){
+    var t = e.target;
+    if (t.classList.contains("ans")) {
+      var q = QUESTIONS[i];
+      var next = q[t.dataset.a];
+      if (next) { path.push(i); renderResult(next); return; }
+      path.push(i);
+      i = i + 1;
+      if (i >= QUESTIONS.length) { renderResult("betroffen"); return; }
+      renderQuestion();
+      return;
+    }
+    if (t.classList.contains("back")) {
+      i = path.length ? path.pop() : 0;
+      renderQuestion();
+    }
+  });
+})();
+</script>
